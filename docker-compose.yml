@@ -1,0 +1,42 @@
+version: '2'
+
+services:
+  mongo:
+    restart: always
+    image: mongo:3.4
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo:/data/db
+
+  memcached:
+    restart: always
+    image: memcached:1.4-alpine
+    ports:
+      - "11211:11211"
+
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:/var/www/html
+      - ./conf/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - memcached
+
+  php-phalcon:
+    image: phalconphp/php-fpm:7.2-min
+    build: .
+    volumes:
+      - ./app:/var/www/html
+    env_file:
+      - variables.env
+    links:
+      - memcached
+
+volumes:
+  mongo:
+    driver: local
