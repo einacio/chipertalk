@@ -1,8 +1,6 @@
-FROM phalconphp/php-fpm:7.2-min
+FROM mileschou/phalcon:7.2-fpm-alpine
 
-RUN apt-get update \
- && apt-get install -y git zlib1g-dev \
- && docker-php-ext-install pdo
-
-FROM conf
-COPY nginx/default.conf /etc/nginx/conf.d/nginx.conf
+RUN apk update && apk add autoconf php7-dev build-base
+RUN pecl install mongodb
+RUN apk del autoconf php7-dev build-base
+RUN echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongo.ini
